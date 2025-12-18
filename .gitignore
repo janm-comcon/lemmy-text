@@ -2,15 +2,3 @@
 __pycache__/
 *.pyc
 .venv/
-.dacy/
-
-# Models & Data
-data
-
-# Logs
-logs/*
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db

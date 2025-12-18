@@ -1,21 +1,29 @@
-# core/location_extractor.py
-from typing import Iterable, Optional
+from typing import Iterable, List
 
-from core.domain_lexicon_gold import LOCATIONS, OBJECTS, PRODUCTS
+from core.claimed_registry import ClaimedRegistry
+from core.domain_lexicon_gold import LOCATIONS, ACTIONS, PRODUCTS
 from core.domain_normalization import NORMALIZE_LOCATION
 
 
-def extract_location(tokens: Iterable[str]) -> Optional[str]:
+def extract_locations(
+    tokens: Iterable[str],
+    registry: ClaimedRegistry,
+) -> List[str]:
+    locations: List[str] = []
+
     for token in tokens:
         canonical = NORMALIZE_LOCATION.get(token, token)
 
         if canonical not in LOCATIONS:
             continue
 
-        # location must not be object or product
-        if canonical in OBJECTS or canonical in PRODUCTS:
+        if canonical in ACTIONS or canonical in PRODUCTS:
             continue
 
-        return canonical
+        if registry.is_claimed(canonical):
+            continue
 
-    return None
+        registry.claim(canonical, "location")
+        locations.append(canonical)
+
+    return locations

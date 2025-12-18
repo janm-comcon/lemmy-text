@@ -1,25 +1,29 @@
-# core/action_extractor.py
-from typing import Iterable, Optional
+from typing import Iterable, List
 
-from core.domain_lexicon_gold import ACTIONS, OBJECTS, LOCATIONS, PRODUCTS
+from core.claimed_registry import ClaimedRegistry
+from core.domain_lexicon_gold import ACTIONS, PRODUCTS
 from core.domain_normalization import NORMALIZE_ACTION
 
 
-def extract_action(tokens: Iterable[str]) -> Optional[str]:
+def extract_actions(
+    tokens: Iterable[str],
+    registry: ClaimedRegistry,
+) -> List[str]:
+    actions: List[str] = []
+
     for token in tokens:
         canonical = NORMALIZE_ACTION.get(token, token)
 
         if canonical not in ACTIONS:
             continue
 
-        # must not overlap any other category
-        if (
-            canonical in OBJECTS
-            or canonical in LOCATIONS
-            or canonical in PRODUCTS
-        ):
+        if canonical in PRODUCTS:
             continue
 
-        return canonical
+        if registry.is_claimed(canonical):
+            continue
 
-    return None
+        registry.claim(canonical, "action")
+        actions.append(canonical)
+
+    return actions
