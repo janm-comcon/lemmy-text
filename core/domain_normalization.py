@@ -7,6 +7,7 @@
 NORMALIZE_ACTION = {
     "afprøve": "afprøvet",
     "afprøvet": "afprøvet",
+    "frakoblet": "frakobling",
     "fejlfinding": "fejlfinding",
     "fejlsøge": "fejlsøgning",
     "genstarte": "genstart",

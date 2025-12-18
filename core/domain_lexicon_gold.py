@@ -42,6 +42,7 @@ ACTIONS = {
 OBJECTS = {
     "afbryder",
     "armatur",
+    "brugsgenstand",
     "display",
     "gang",
     "gruppe",
@@ -51,6 +52,7 @@ OBJECTS = {
     "kogeplade",
     "kontakt",
     "køleanlæg",
+    "ladekabel",
     "lampe",
     "ledning",
     "motor",
@@ -84,6 +86,7 @@ LOCATIONS = {
     "kælder",
     "kontor",
     "køkken",
+    "ladestander",
     "lager",
     "loft",
     "maskinrum",
@@ -96,6 +99,31 @@ LOCATIONS = {
     "værksted",
     "værelse",
 }
+
+
+LOCATION_PREPOSITIONS = {
+    "badeværelse": "på",
+    "butik": "i",
+    "garage": "i",
+    "gang": "i",
+    "hal": "i",
+    "kælder": "i",
+    "kontor": "på", 
+    "køkken": "i",
+    "ladestander": "på",
+    "lager": "på",
+    "loft": "på",
+    "maskinrum": "i",
+    "opgang": "i",
+    "stue": "i",
+    "tag": "på",
+    "toilet": "på",
+    "udendørs": "",
+    "udvendig": "",
+    "værksted": "på",
+    "værelse": "i",
+}
+
 
 # -----------------
 # PRODUCTS (fallback only)
@@ -113,5 +141,29 @@ PRODUCTS = {
     "panasonic",
     "plc",
     "rcd",
+    "samsung", 
+    "siemens",
+    "sony",
+    "samsung",
+    "shucko",   
     "udedel",
+}
+
+# -----------------
+# UNITS
+# -----------------
+UNITS = {
+    "m2", 
+    "m3", 
+    "g", 
+    "kg", 
+    "cm",
+    "dm",
+    "mm",  
+    "m", 
+    "l",
+    "ml",
+    "dl",
+    "C°",
+    "stk",
 }

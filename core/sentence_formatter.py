@@ -1,60 +1,82 @@
-# core/sentence_formatter.py
-
 from core.role_joiner import join_role
+from core.domain_lexicon_gold import LOCATION_PREPOSITIONS
 
 
 GLUE_RULES = {
-    "action": {
-        "joiner": " og ",
-    },
-    "object": {
-        "joiner": " og ",
-        "preposition": "af",
-    },
-    "location": {
-        "joiner": " og ",
-        "preposition": "i",
-    },
+    "action": {"joiner": " og "},
+    "object": {"joiner": " og ", "preposition": "af"},
 }
+
+
+def _pluralize(name: str) -> str:
+    if name.endswith("e"):
+        return name + "r"
+    return name + "er"
+
+
+def _render_object(obj, emit_quantity: bool) -> str:
+    if isinstance(obj, str):
+        return obj
+
+    name = obj["name"]
+    qty = obj.get("quantity")
+    unit = obj.get("unit")
+
+    # plural is grammatical, not optional
+    render_name = _pluralize(name) if qty and qty > 1 else name
+
+    if emit_quantity and qty:
+        if unit:
+            return f"{qty} {unit} {render_name}"
+        return f"{qty} {render_name}"
+
+    return render_name
+
+
+def _render_location(loc: str) -> str:
+    prep = LOCATION_PREPOSITIONS.get(loc, "i")
+    return f"{prep} {loc}" if prep else loc
 
 
 def format_sentence(
     actions: list[str],
-    objects: list[str],
+    products: list[str],
+    objects: list,
     locations: list[str],
+    *,
+    emit_quantity: bool = False,
 ) -> str:
-    """
-    Format sentence using role-based glue rules.
-
-    Special rule:
-    - If the only action is 'afprøvet' and at least one object exists,
-      bind the test explicitly to the first object:
-        '<object> afprøvet.'
-    """
-    # --- special disambiguation rule ---
-    if actions == ["afprøvet"] and objects:
-        return f"{objects[0]} afprøvet."
-
-    # --- default behavior ---
-    if not actions:
-        actions = ["afprøvet"]
-
     parts = []
 
-    # actions first
-    parts.append(join_role("action", actions, GLUE_RULES))
+    # test word handling: render only if explicitly present
+    test_present = "afprøvet" in actions
+    actions = [a for a in actions if a != "afprøvet"]
 
-    obj_part = join_role("object", objects, GLUE_RULES)
+    if actions:
+        parts.append(join_role("action", actions, GLUE_RULES))
+
+    rendered_objects = [_render_object(o, emit_quantity) for o in objects]
+
+    # product must precede object (bind first product to first object deterministically)
+    if products and rendered_objects:
+        rendered_objects[0] = f"{products[0]} {rendered_objects[0]}"
+
+    obj_part = join_role("object", rendered_objects, GLUE_RULES)
     if obj_part:
         parts.append(obj_part)
 
-    loc_part = join_role("location", locations, GLUE_RULES)
-    if loc_part:
-        parts.append(loc_part)
+    if locations:
+        parts.append(" og ".join(_render_location(l) for l in locations))
 
-    sentence = " ".join(parts) + "."
+    sentence = " ".join(parts).strip()
+    if sentence:
+        sentence += "."
 
-    if "afprøvet" not in actions:
-        sentence += " afprøvet."
+    # explicit test clause: always prefixed by first object (incl. product + plural), no implicit append
+    if test_present and objects:
+        first_object = _render_object(objects[0], emit_quantity)
+        if products:
+            first_object = f"{products[0]} {first_object}"
+        sentence += f" {first_object} afprøvet."
 
     return sentence
